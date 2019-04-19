@@ -1,0 +1,39 @@
+from threading import Thread, Lock
+import requests
+import RPi.GPIO as GPIO
+from time import sleep
+
+
+buzzer_pin = 18
+GPIO.setmode(GPIO.BCM)
+GPIO.setup(buzzer_pin, GPIO.OUT)
+
+
+with open('./urls.txt', 'r') as f:
+    urls = f.readlines()
+    
+total = len(urls)
+count = 0
+
+lock = Lock()
+def getImage(ix, url):
+    resp = requests.get(url)
+    
+    fname = './image_{}.jpg'.format(ix)
+    with open(fname, 'wb') as f:
+        f.write(resp.content)
+    print('Complete', url)
+    
+    global count
+    #lock.acquire()
+    with lock:
+        count+=1
+        if(count == total):
+            print('Total download complete')
+            GPIO.output(buzzer_pin, GPIO.HIGH)
+            sleep(2)
+            GPIO.cleanup()
+    #lock.release()
+        
+for ix, url in enumerate(urls):
+    Thread(target=getImage, args=(ix,url)).start()

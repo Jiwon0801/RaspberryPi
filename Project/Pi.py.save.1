@@ -1,0 +1,14 @@
+from gpiozero import DistanceSensor
+from picamera import PiCamera
+from time import sleep
+
+dist_sensor = DistanceSensor(23,24)
+
+#def getDist():
+#	return dist_sensor.distance
+	
+
+
+while True:
+	dist = getDist()
+	print(dist)
